@@ -1,0 +1,13 @@
+package com.clc.levelup;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class LevelupMerchApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(LevelupMerchApplication.class, args);
+	}
+
+}
