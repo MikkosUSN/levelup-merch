@@ -1,0 +1,48 @@
+# Level Up Game Merch Store
+
+Spring Boot **2.7.18** (Java **17**) — **Milestone 2**
+
+## Run locally
+1. JDK 17 installed and selected in STS (Window → Preferences → Java → Installed JREs).
+2. Import: **File → Import → Git → Projects from Git (with URI)** → paste the repo URL.
+3. **Maven → Update Project** (Force Update) → **Project → Clean**.
+4. **Run As → Spring Boot App**.
+5. App will be available at `http://localhost:8080/` (after MVC pages are added).
+
+## Demo account (seed)
+- Email: `demo@clc.com`  
+- Password: `pass1234`  
+- Username: `demo`
+
+## Project structure (M2)
+- `com.clc.levelup.dto` — `UserRegistration`, `LoginRequest`
+- `com.clc.levelup.validation` — `@PasswordMatches`, `PasswordMatchesValidator`
+- `com.clc.levelup.model` — `User`
+- `com.clc.levelup.service` — `UserService`, `AuthService` + in-memory impls
+- `com.clc.levelup.config` — `MessageConfig`, `DataSeed` (optional)
+- (MVC controllers + Thymeleaf views will be added by the UI role)
+
+## Milestone 2 scope (team split)
+**Mikkos (completed):**
+- DTOs & validation (including cross-field validator)
+- Domain model (`User`)
+- In-memory services (`InMemoryUserService`, `InMemoryAuthService`)
+- Validation messages & MessageSource config
+- Optional seed user
+
+**Jacob (completed):**
+- Spring MVC controllers (Home, Register, Login/Logout, Products)
+- Thymeleaf layout & fragments, pages (Bootstrap 5)
+- Responsive check (mobile, tablet, desktop)
+- Screencast + Design Report updates
+
+## Workflow
+- Default branch: `master`
+- Use feature branches → open Pull Requests into `master`
+- Example: `feature/m2-ui-controllers-jacob`
+
+## Tech notes
+- **No DB in M2** (data in memory; resets on restart)
+- Session key: `"principal"` after login (used to toggle navbar)
+- Message keys: `user.email.exists`, `user.username.exists`, `auth.invalid`, `validation.passwords.mismatch`
+
