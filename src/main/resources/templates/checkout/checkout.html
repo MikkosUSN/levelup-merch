@@ -5,10 +5,16 @@
   <title>Checkout</title>
 </head>
 <body>
-<div th:fragment="content">
+<div th:fragment="content" class="container mt-4">
   <h2>Checkout</h2>
-  <p>Total: $<span th:text="${total}"></span></p>
-  <!-- checkout form here -->
+
+  <!-- Show formatted total (always $0.00 until cart is ready in later milestones) -->
+  <p>Total: <span th:text="${totalDisplay}">$0.00</span></p>
+
+  <!-- Checkout form placeholder -->
+  <form>
+    <!-- add fields for address, payment, etc. in future -->
+  </form>
 </div>
 </body>
 </html>
