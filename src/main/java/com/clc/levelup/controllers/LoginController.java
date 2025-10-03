@@ -36,7 +36,8 @@ public class LoginController {
     @PostMapping("/login")
     public String processLogin(@Valid @ModelAttribute("loginRequest") LoginRequest form,
                                BindingResult result,
-                               HttpSession session) {
+                               HttpSession session,
+                               Model model) { // added Model for plain error message
         // Field-level validation errors
         if (result.hasErrors()) {
             return "auth/login";
@@ -46,6 +47,8 @@ public class LoginController {
         if (!auth.authenticate(form)) {
             // Global error uses messages.properties key
             result.reject("auth.invalid");
+            // Plain model error for template ${error}
+            model.addAttribute("error", "Invalid credentials. Try user/pass");
             return "auth/login";
         }
 

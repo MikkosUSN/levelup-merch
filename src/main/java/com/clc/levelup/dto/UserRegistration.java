@@ -1,6 +1,6 @@
 package com.clc.levelup.dto;
 
-import javax.validation.constraints.*;                 
+import javax.validation.constraints.*;
 import com.clc.levelup.validation.PasswordMatches;
 
 // Data from the Register form. Validations keep input clean and helpful.
@@ -21,8 +21,11 @@ public class UserRegistration {
   @Pattern(regexp="^[A-Za-z0-9]{4,20}$")
   private String username;
 
-  @NotBlank @Size(min=8) private String password;        // basic rule for now
-  @NotBlank              private String confirmPassword; // must match password
+  // At least 6 characters
+  @NotBlank @Size(min=6) private String password;
+
+  // Same minimum as password
+  @NotBlank @Size(min=6) private String confirmPassword;
 
   // Getters/setters so form binding works later
   public String getFirstName() { return firstName; }
