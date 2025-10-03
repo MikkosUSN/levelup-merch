@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="fragments/_layout :: layout">
+<head>
+  <title>Home</title>
+</head>
+<body>
+<div th:fragment="content">
+  <h1>Welcome to Level Up!</h1>
+  <p><a th:href="@{/products}">View Products</a></p>
+</div>
+</body>
+</html>
