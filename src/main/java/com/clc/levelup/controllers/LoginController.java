@@ -9,12 +9,13 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.clc.levelup.dto.LoginRequest;
 import com.clc.levelup.service.AuthService;
 
 /**
- * Login flow for M2 (no DB/security yet).
+ * Login flow (no DB/security yet).
  * On success, stores a simple principal in the HTTP session under key "principal".
  */
 @Controller
@@ -27,9 +28,19 @@ public class LoginController {
     }
 
     @GetMapping("/login")
-    public String showLogin(Model model) {
+    public String showLogin(Model model,
+                            // simple message support (optional, after logout or registration)
+                            @RequestParam(value = "message", required = false) String message) {
         // Backing object for the form (fields: emailOrUsername, password)
-        model.addAttribute("loginRequest", new LoginRequest());
+        if (!model.containsAttribute("loginRequest")) {
+            model.addAttribute("loginRequest", new LoginRequest());
+        }
+
+        // Pass through optional info message
+        if (message != null && !message.isBlank()) {
+            model.addAttribute("message", message);
+        }
+
         return "auth/login";
     }
 
@@ -37,23 +48,28 @@ public class LoginController {
     public String processLogin(@Valid @ModelAttribute("loginRequest") LoginRequest form,
                                BindingResult result,
                                HttpSession session,
-                               Model model) { // added Model for plain error message
+                               Model model) {
+
         // Field-level validation errors
         if (result.hasErrors()) {
             return "auth/login";
         }
 
-        // Use in-memory AuthService for M2
+        // Use in-memory AuthService
         if (!auth.authenticate(form)) {
-            // Global error uses messages.properties key
+            // Global error uses messages.properties key if needed
             result.reject("auth.invalid");
-            // Plain model error for template ${error}
-            model.addAttribute("error", "Invalid credentials. Try user/pass");
+
+            // Removed the "error" attribute as requested
+            model.addAttribute("message", "Invalid credentials, please try again.");
+
             return "auth/login";
         }
 
         // Success: stash a simple principal in session for navbar/menu state
         session.setAttribute("principal", auth.toPrincipal(form.getEmailOrUsername()));
+
+        // Redirect to products after successful login
         return "redirect:/products";
     }
 }

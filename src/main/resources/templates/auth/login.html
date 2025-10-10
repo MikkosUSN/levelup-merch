@@ -1,36 +1,62 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="fragments/_layout :: layout">
 <head>
-  <title>Login</title>
+  <title>Login - Level Up Game Merch Store</title> <!-- clearer page title -->
 </head>
 <body>
-<div th:fragment="content">
-  <h2>Login</h2>
+<div th:fragment="content" class="container mt-4">
+  <!-- Page-scope wrapper so CSS can target only this page if needed -->
+  <div class="login-page">
 
-  <!-- Bind to LoginRequest (fields: emailOrUsername, password) -->
-  <form th:action="@{/login}" th:object="${loginRequest}" method="post" class="form">
-    <div class="mb-3">
-      <label class="form-label">Username or Email:</label>
-      <input type="text" th:field="*{emailOrUsername}" class="form-control"/>
-      <div th:if="${#fields.hasErrors('emailOrUsername')}" th:errors="*{emailOrUsername}" class="text-danger"></div>
-    </div>
+    <h2>Login</h2>
 
-    <div class="mb-3">
-      <label class="form-label">Password:</label>
-      <input type="password" th:field="*{password}" class="form-control"/>
-      <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="text-danger"></div>
-    </div>
+    <!-- Bind to LoginRequest (fields: emailOrUsername, password) -->
+    <!-- kept our binding + layout; kept action path -->
+    <form th:action="@{/login}" th:object="${loginRequest}" method="post" class="form">
 
-    <button type="submit" class="btn btn-primary">Login</button>
-  </form>
+      <!-- added placeholder + required for better UX -->
+      <div class="mb-3">
+        <label class="form-label">Username or Email:</label>
+        <input type="text"
+               th:field="*{emailOrUsername}"
+               class="form-control"
+               placeholder="Enter your username or email"
+               required />
+        <div th:if="${#fields.hasErrors('emailOrUsername')}"
+             th:errors="*{emailOrUsername}"
+             class="text-danger"></div>
+      </div>
 
-  <!-- Global errors produced by BindingResult (e.g., auth.invalid) -->
-  <div th:if="${#fields.hasGlobalErrors()}" th:each="e : ${#fields.globalErrors()}"
-       class="alert alert-danger mt-3" th:text="${e}"></div>
+      <!-- added placeholder + required for better UX -->
+      <div class="mb-3">
+        <label class="form-label">Password:</label>
+        <input type="password"
+               th:field="*{password}"
+               class="form-control"
+               placeholder="Enter your password"
+               required />
+        <div th:if="${#fields.hasErrors('password')}"
+             th:errors="*{password}"
+             class="text-danger"></div>
+      </div>
 
-  <!-- Existing message placeholder -->
-  <div th:if="${error}" class="alert alert-danger mt-3" th:text="${error}"></div>
+      <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+
+    <!-- Global errors produced by BindingResult (e.g., auth.invalid) -->
+    <div th:if="${#fields.hasGlobalErrors()}" th:each="e : ${#fields.globalErrors()}"
+         class="alert alert-danger mt-3" th:text="${e}"></div>
+
+    <!-- simple message area (kept friendly info text) -->
+    <p th:if="${message}" class="mt-3 text-warning" th:text="${message}"></p>
+
+    <!-- link to registration page -->
+    <p class="mt-3">
+      <a th:href="@{/register}">Don’t have an account? Register here</a>
+    </p>
+
+  </div> <!-- /.login-page -->
 </div>
 </body>
 </html>

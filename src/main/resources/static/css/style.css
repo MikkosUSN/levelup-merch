@@ -1,0 +1,71 @@
+/* ===== Level Up Game Merch Store Styles ===== */
+
+body {
+    background-color: #1a1a1a;
+    color: #f0f0f0;
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+h1, h2, h3 {
+    color: #ffd700;
+}
+
+.navbar-brand {
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.btn-primary {
+    background-color: #ff6600;
+    border: none;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #e65c00;
+}
+
+footer {
+    background-color: #111;
+    color: #ccc;
+    padding: 15px;
+    font-size: 0.9rem;
+}
+
+.container {
+    max-width: 960px;
+}
+
+.form-control {
+    background-color: #333;
+    color: #fff;
+    border: 1px solid #444;
+}
+
+.form-control:focus {
+    background-color: #2b2b2b;
+    color: #fff;
+    border-color: #ff6600;
+    box-shadow: none;
+}
+
+/* === LOGIN PAGE PLACEHOLDER COLOR UPDATE === */
+/* Team note: scope to a wrapper class, not <body>, since layout owns <body> */
+.login-page input::placeholder,
+.login-page textarea::placeholder {
+    color: #ff6600 !important;   /* same orange as Login button */
+    opacity: 1;                  /* make sure color is not faint */
+}
+
+/* Vendor prefixes for wider browser support */
+.login-page input::-webkit-input-placeholder,
+.login-page textarea::-webkit-input-placeholder { color: #ff6600 !important; }
+.login-page input::-moz-placeholder,
+.login-page textarea::-moz-placeholder { color: #ff6600 !important; }
+.login-page input:-ms-input-placeholder,
+.login-page textarea:-ms-input-placeholder { color: #ff6600 !important; }
+.login-page input::-ms-input-placeholder,
+.login-page textarea::-ms-input-placeholder { color: #ff6600 !important; }
+
