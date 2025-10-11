@@ -11,12 +11,15 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 public class GlobalModelAttributes {
 
   /**
-   * Exposes the logged-in username (from session "principal") as "currentUser".
+   * Exposes the logged-in username (from session "principal"/"currentUser") as "currentUser".
+   * Team note (M4): Prefer "currentUser" but also accept legacy "principal".
    */
   @ModelAttribute("currentUser")
   public String currentUser(HttpSession session) {
-    Object p = (session == null) ? null : session.getAttribute("principal");
-    return (p == null) ? null : p.toString();
+    if (session == null) return null;
+    Object val = session.getAttribute("currentUser");
+    if (val == null) val = session.getAttribute("principal"); // compatibility
+    return (val == null) ? null : String.valueOf(val);
   }
 
   /**
@@ -33,6 +36,6 @@ public class GlobalModelAttributes {
    */
   @ModelAttribute("isLoggedIn")
   public boolean isLoggedIn(HttpSession session) {
-    return session != null && session.getAttribute("principal") != null;
+    return currentUser(session) != null;
   }
 }

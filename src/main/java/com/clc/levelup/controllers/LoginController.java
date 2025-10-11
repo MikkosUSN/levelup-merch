@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.clc.levelup.dto.LoginRequest;
+import com.clc.levelup.model.User;
 import com.clc.levelup.service.AuthService;
 
 /**
@@ -67,7 +68,19 @@ public class LoginController {
         }
 
         // Success: stash a simple principal in session for navbar/menu state
-        session.setAttribute("principal", auth.toPrincipal(form.getEmailOrUsername()));
+        // Team note (M4): ensure we store a FRIENDLY STRING (username), not the full User object.
+        Object principal = auth.toPrincipal(form.getEmailOrUsername());
+        String displayName;
+        if (principal instanceof User) {
+            displayName = ((User) principal).getUsername();
+        } else {
+            // Fallback: whatever AuthService returned, turn into a string.
+            displayName = String.valueOf(principal);
+        }
+
+        // Keep legacy "principal" key for compatibility AND add "currentUser" for templates.
+        session.setAttribute("principal", displayName);
+        session.setAttribute("currentUser", displayName);  // used by GlobalModelAttributes + navbar
 
         // Redirect to products after successful login
         return "redirect:/products";

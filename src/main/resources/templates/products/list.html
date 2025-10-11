@@ -22,7 +22,8 @@
       <tr th:each="p : ${products}">
         <td th:text="${p.id}">1</td>
         <td th:text="${p.name}">Name</td>
-        <td th:text="${p.price}">0.00</td>
+        <!-- M4 update: use ConversionService (@NumberFormat) so we always show 2 decimals -->
+        <td th:text="${{p.price}}">0.00</td>
         <td th:text="${p.category}">Category</td>
       </tr>
     </tbody>

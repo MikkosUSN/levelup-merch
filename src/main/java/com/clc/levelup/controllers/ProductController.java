@@ -37,10 +37,23 @@ public class ProductController {
     @PostMapping
     public String create(@Valid @ModelAttribute("product") Product p,
                          BindingResult result) {
+
+        // simple required checks for NOT NULL DB columns (keep it lightweight)
+        if (p.getManufacturer() == null || p.getManufacturer().isBlank()) {
+            result.rejectValue("manufacturer", "NotBlank", "Manufacturer is required.");
+        }
+        if (p.getCategory() == null || p.getCategory().isBlank()) {
+            result.rejectValue("category", "NotBlank", "Category is required.");
+        }
+        if (p.getPartNumber() == null || p.getPartNumber().isBlank()) {
+            result.rejectValue("partNumber", "NotBlank", "Part number is required.");
+        }
+
         if (result.hasErrors()) {
             return "products/new"; // go back to form if errors
         }
-        products.create(p); // add product in memory
+
+        products.create(p); // add product
         return "redirect:/products/list"; // redirect to list
     }
 }
