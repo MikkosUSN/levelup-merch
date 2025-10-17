@@ -5,7 +5,7 @@
 -- 2) Paste this whole INSERT and click the lightning bolt (Execute).
 -- 3) Run: SELECT * FROM products;  to see the new rows in the grid.
 -- ================================
--- M4 update: columns now align with app/model:
+-- Note: columns align with app/model:
 --   - price  (was cost)
 --   - partNumber (was part_number)
 --   - category added (kept manufacturer)

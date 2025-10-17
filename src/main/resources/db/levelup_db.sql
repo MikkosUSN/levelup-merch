@@ -1,4 +1,4 @@
--- ===== LevelUp Game Merch - Milestone 4 DDL =====
+-- ===== LevelUp Game Merch - Database DDL =====
 -- Schema: levelup_db
 
 DROP TABLE IF EXISTS user_roles;
@@ -37,7 +37,7 @@ CREATE TABLE products (
   name          VARCHAR(128) NOT NULL,
   description   VARCHAR(512) NOT NULL,
   manufacturer  VARCHAR(128) NOT NULL,           -- keep brand/maker
-  category      VARCHAR(64)  NOT NULL,           -- NEW: the store category (e.g., Apparel)
+  category      VARCHAR(64)  NOT NULL,           -- store category (e.g., Apparel)
   partNumber    VARCHAR(64)  NOT NULL,           -- camelCase column name
   quantity      INT          NOT NULL DEFAULT 0,
   price         DECIMAL(10,2) NOT NULL DEFAULT 0.00,

@@ -1,6 +1,9 @@
 package com.clc.levelup.service;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.clc.levelup.model.Product;
 import com.clc.levelup.repository.ProductRepository;
@@ -26,13 +29,42 @@ public class ProductService {
         return repo.findAll();
     }
 
+    /** Get one product by id (used for details and edit). */
+    public Optional<Product> findById(Long id) {
+        return repo.findById(id);
+    }
+
     /**
      * Save a new product (used by the create form).
      * @param p product from the form
      * @return saved entity with id
      */
+    @Transactional
     public Product create(Product p) {
-        // In M4 we trust the form; validation is already on the DTO.
+        // Keep validation on the form/controller for now.
         return repo.save(p);
+    }
+
+    /**
+     * Update an existing product.
+     * Simple existence check so we don't create by mistake.
+     */
+    @Transactional
+    public Product update(Product p) {
+        if (p.getId() == null || !repo.existsById(p.getId())) {
+            throw new IllegalArgumentException("Product not found for update.");
+        }
+        return repo.save(p);
+    }
+
+    /**
+     * Delete by id with a quick existence check.
+     */
+    @Transactional
+    public void deleteById(Long id) {
+        if (!repo.existsById(id)) {
+            throw new IllegalArgumentException("Product not found for delete.");
+        }
+        repo.deleteById(id);
     }
 }
