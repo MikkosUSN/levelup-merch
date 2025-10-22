@@ -34,10 +34,12 @@ footer {
     font-size: 0.9rem;
 }
 
+/* Team note: widen slightly to feel like Jacob’s table spacing */
 .container {
-    max-width: 960px;
+    max-width: 1080px; /* was 960px; spacing only, colors unchanged */
 }
 
+/* Form inputs (dark theme) */
 .form-control {
     background-color: #333;
     color: #fff;
@@ -69,3 +71,21 @@ footer {
 .login-page input::-ms-input-placeholder,
 .login-page textarea::-ms-input-placeholder { color: #ff6600 !important; }
 
+/* ====== Table spacing tweaks to mirror Jacob’s feel (no color changes) ====== */
+.table {
+    margin-bottom: 1.5rem;
+}
+
+.table th,
+.table td {
+    padding: 0.75rem 0.9rem;   /* a bit more breathing room */
+    vertical-align: middle;    /* center align like Jacob's */
+}
+
+.table thead th {
+    border-bottom-width: 2px;
+}
+
+.text-end .btn {
+    margin-left: 0.25rem;      /* even spacing between action buttons */
+}

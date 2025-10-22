@@ -6,31 +6,49 @@
 <div th:fragment="content" class="container mt-4">
 
   <!-- Page header and button to add a product -->
-  <div class="d-flex justify-content-between align-items-center">
-    <h2>Products</h2>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Products</h2>
     <a class="btn btn-success" th:href="@{/products/new}">New Product</a>
   </div>
-  <hr/>
+  <hr class="mt-2 mb-4"/>
+
+  <!-- Flash messages are rendered in the layout; nothing here -->
 
   <!-- Show table if products exist -->
-  <table class="table table-striped" th:if="${products} and !${#lists.isEmpty(products)}">
+  <table class="table table-striped table-hover align-middle"
+         th:if="${products} and !${#lists.isEmpty(products)}">
     <thead>
-      <tr><th>ID</th><th>Name</th><th>Price</th><th>Category</th></tr>
+      <tr>
+        <th class="col-1">ID</th>
+        <th class="col-5">Name</th>
+        <th class="col-2">Price</th>
+        <th class="col-2">Category</th>
+        <th class="col-2 text-end">Actions</th>
+      </tr>
     </thead>
     <tbody>
       <!-- Loop through each product -->
       <tr th:each="p : ${products}">
         <td th:text="${p.id}">1</td>
         <td th:text="${p.name}">Name</td>
-        <!-- M4 update: use ConversionService (@NumberFormat) so we always show 2 decimals -->
+        <!-- Team note: @NumberFormat on model ensures two-decimal display -->
         <td th:text="${{p.price}}">0.00</td>
         <td th:text="${p.category}">Category</td>
+        <td class="text-end text-nowrap">
+          <a class="btn btn-sm btn-outline-secondary me-2"
+             th:href="@{'/products/' + ${p.id}}">View</a>
+          <a class="btn btn-sm btn-outline-primary me-2"
+             th:href="@{'/products/edit/' + ${p.id}}">Edit</a>
+          <!-- Two-step delete: go to confirm page first -->
+          <a class="btn btn-sm btn-outline-danger"
+             th:href="@{'/products/delete/' + ${p.id}}">Delete</a>
+        </td>
       </tr>
     </tbody>
   </table>
 
   <!-- Message if no products -->
-  <p th:if="${#lists.isEmpty(products)}">No products yet.</p>
+  <p th:if="${#lists.isEmpty(products)}" class="mt-3">No products yet.</p>
 </div>
 </body>
 </html>

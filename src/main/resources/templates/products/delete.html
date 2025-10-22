@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="fragments/_layout :: layout">
+<head><title>Delete Product</title></head>
+<body>
+<div th:fragment="content" class="container mt-4">
+
+  <h2>Delete Product</h2>
+  <hr/>
+
+  <!-- Team note: two-step delete keeps destructive action off GET -->
+  <p>Are you sure you want to delete <strong th:text="${product.name}">Product</strong>?</p>
+
+  <form th:action="@{'/products/delete/' + ${product.id}}" method="post" class="d-flex gap-2">
+    <a class="btn btn-secondary" th:href="@{'/products/' + ${product.id}}">Cancel</a>
+    <button class="btn btn-danger" type="submit">Yes, Delete</button>
+  </form>
+
+</div>
+</body>
+</html>

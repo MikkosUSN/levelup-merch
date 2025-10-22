@@ -24,12 +24,14 @@ public class ProductService {
     }
 
     /** Get all products for the list page. */
+    @Transactional(readOnly = true) // read-only: no writes happen here
     public Iterable<Product> findAll() {
         // No filtering yet; just return everything.
         return repo.findAll();
     }
 
     /** Get one product by id (used for details and edit). */
+    @Transactional(readOnly = true) // read-only lookup
     public Optional<Product> findById(Long id) {
         return repo.findById(id);
     }
@@ -51,9 +53,8 @@ public class ProductService {
      */
     @Transactional
     public Product update(Product p) {
-        if (p.getId() == null || !repo.existsById(p.getId())) {
-            throw new IllegalArgumentException("Product not found for update.");
-        }
+        // Use helper so we fail fast if the id is missing or unknown
+        requireExists(p.getId(), "Product not found for update.");
         return repo.save(p);
     }
 
@@ -62,9 +63,20 @@ public class ProductService {
      */
     @Transactional
     public void deleteById(Long id) {
-        if (!repo.existsById(id)) {
-            throw new IllegalArgumentException("Product not found for delete.");
-        }
+        requireExists(id, "Product not found for delete.");
         repo.deleteById(id);
+    }
+
+    // --- Helpers ---
+
+    /**
+     * Small helper to make existence checks easy to read.
+     * Throws IllegalArgumentException with the given message when not found.
+     */
+    @Transactional(readOnly = true)
+    protected void requireExists(Long id, String messageIfMissing) {
+        if (id == null || !repo.existsById(id)) {
+            throw new IllegalArgumentException(messageIfMissing);
+        }
     }
 }
