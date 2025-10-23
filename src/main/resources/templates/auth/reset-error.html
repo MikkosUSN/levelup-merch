@@ -1,0 +1,8 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><title>Reset Error</title></head>
+<body>
+<p th:text="${error}">Invalid or expired token.</p>
+<p><a th:href="@{/forgot}">Request another link</a></p>
+</body>
+</html>
