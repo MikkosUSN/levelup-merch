@@ -1,3 +1,4 @@
+// src/main/java/com/clc/levelup/controllers/RegisterController.java
 package com.clc.levelup.controllers;
 
 import javax.validation.Valid;
@@ -44,10 +45,15 @@ public class RegisterController {
                               BindingResult br,
                               Model model) {
 
-        if (users.existsByEmail(dto.getEmail())) {
+        // Update: normalize inputs to keep uniqueness checks consistent
+        final String normalizedEmail = dto.getEmail() == null ? "" : dto.getEmail().trim().toLowerCase();
+        final String normalizedUsername = dto.getUsername() == null ? "" : dto.getUsername().trim();
+
+        // Preserve original checks; add case-insensitive fallbacks for safety
+        if (users.existsByEmail(normalizedEmail) || users.existsByEmailIgnoreCase(normalizedEmail)) {
             br.rejectValue("email", "user.email.exists");
         }
-        if (users.existsByUsername(dto.getUsername())) {
+        if (users.existsByUsername(normalizedUsername) || users.existsByUsernameIgnoreCase(normalizedUsername)) {
             br.rejectValue("username", "user.username.exists");
         }
 
@@ -56,9 +62,13 @@ public class RegisterController {
         }
 
         // Store user data (password hashing handled in service)
-        users.emulateCreate(dto);
+        users.emulateCreate(dto); // kept original call for compatibility
 
-        model.addAttribute("message", "Registration successful for " + dto.getUsername() + "!");
+        // Update: if you have a production create method that hashes passwords and assigns ROLE_USER,
+        // prefer using it (uncomment line below and remove emulateCreate above).
+        // users.create(dto);
+
+        model.addAttribute("message", "Registration successful for " + normalizedUsername + "!");
         return "auth/register-success";
     }
 }

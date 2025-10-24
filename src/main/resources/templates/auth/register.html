@@ -2,82 +2,123 @@
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="fragments/_layout :: layout">
 <head>
-  <title>Register - Level Up Game Merch Store</title> <!-- clearer page title -->
+  <title>Register - Level Up Game Merch Store</title> <!-- team: clearer page title -->
 </head>
 <body>
 <div th:fragment="content" class="container mt-4">
-  <h2>Create an Account</h2> <!-- matches header style -->
+  <h2>Create an Account</h2> <!-- team: matches header style -->
 
   <!-- Bind to UserRegistration DTO -->
-  <form th:action="@{/register}" th:object="${userRegistration}" method="post" class="form">
+  <!-- Update: include CSRF token for POST protection -->
+  <form th:action="@{/register}" th:object="${userRegistration}" method="post" class="form" novalidate>
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
     <div>
       <label>First Name:</label>
-      <!-- added placeholder + required -->
-      <input type="text" th:field="*{firstName}" placeholder="Enter first name" required />
-      <!-- field error styled to match login page -->
+      <!-- team: placeholder + required + autofocus for usability -->
+      <input type="text"
+             th:field="*{firstName}"
+             placeholder="Enter first name"
+             required
+             autocomplete="given-name"
+             autofocus />
+      <!-- team: field error styled to match login page -->
       <div th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}" class="text-danger"></div>
     </div>
 
     <div>
       <label>Last Name:</label>
-      <!-- added placeholder + required -->
-      <input type="text" th:field="*{lastName}" placeholder="Enter last name" required />
-      <!-- field error styled to match login page -->
+      <!-- team: placeholder + required -->
+      <input type="text"
+             th:field="*{lastName}"
+             placeholder="Enter last name"
+             required
+             autocomplete="family-name" />
+      <!-- team: field error styled to match login page -->
       <div th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}" class="text-danger"></div>
     </div>
 
     <div>
       <label>Email:</label>
-      <!-- added placeholder + required -->
-      <input type="email" th:field="*{email}" placeholder="Enter email" required />
-      <!-- field error styled to match login page -->
+      <!-- team: placeholder + required + proper type -->
+      <input type="email"
+             th:field="*{email}"
+             placeholder="Enter email"
+             required
+             autocomplete="email" />
+      <!-- team: field error styled to match login page -->
       <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-danger"></div>
     </div>
 
     <div>
       <label>Phone:</label>
-      <!-- added placeholder (optional field) -->
-      <input type="text" th:field="*{phone}" placeholder="Enter phone number" />
-      <!-- field error styled to match login page -->
+      <!-- team: optional field, consistent with DTO update -->
+      <input type="tel"
+             th:field="*{phone}"
+             placeholder="Enter phone number (optional)"
+             inputmode="tel"
+             autocomplete="tel"
+             pattern="^\\D?\\d{3}\\D?\\d{3}\\D?\\d{4}$"
+             title="Enter a 10-digit phone number (dashes or parentheses allowed), or leave blank." />
+      <!-- team: field error styled to match login page -->
       <div th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}" class="text-danger"></div>
     </div>
 
     <div>
       <label>Username:</label>
-      <!-- added placeholder + required -->
-      <input type="text" th:field="*{username}" placeholder="Choose a username" required />
-      <!-- field error styled to match login page -->
+      <!-- team: placeholder + required + light client constraints -->
+      <!-- Update: allow letters, numbers, dot, underscore, dash; 4–20 chars -->
+      <input type="text"
+             th:field="*{username}"
+             placeholder="Choose a username"
+             required
+             pattern="^[A-Za-z0-9._-]{4,20}$"
+             title="4–20 characters: letters, numbers, dot (.), underscore (_), or dash (-)."
+             autocomplete="username" />
+      <!-- team: field error styled to match login page -->
       <div th:if="${#fields.hasErrors('username')}" th:errors="*{username}" class="text-danger"></div>
     </div>
 
     <div>
       <label>Password:</label>
-      <!-- added placeholder + required -->
-      <input type="password" th:field="*{password}" placeholder="Enter password" required />
-      <!-- field error styled to match login page -->
+      <!-- team: placeholder + required -->
+      <!-- Update: simple rule—at least 6 chars, must include a letter and a number -->
+      <input type="password"
+             th:field="*{password}"
+             placeholder="Enter password"
+             required
+             minlength="6"
+             pattern="^(?=.*[A-Za-z])(?=.*\\d).{6,}$"
+             title="At least 6 characters, with at least one letter and one number."
+             autocomplete="new-password" />
+      <!-- team: field error styled to match login page -->
       <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="text-danger"></div>
     </div>
 
-    <!-- Added to support password confirmation validation -->
+    <!-- Confirm password block -->
     <div>
       <label>Confirm Password:</label>
-      <input type="password" th:field="*{confirmPassword}" placeholder="Re-enter password" required /> <!-- placeholder added -->
-      <!-- field error styled to match login page -->
+      <input type="password"
+             th:field="*{confirmPassword}"
+             placeholder="Re-enter password"
+             required
+             minlength="6"
+             autocomplete="new-password" />
+      <!-- team: field error styled to match login page -->
       <div th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}" class="text-danger"></div>
     </div>
 
-    <!-- global errors (e.g., passwords mismatch) styled to match login page -->
+    <!-- team: global errors (e.g., passwords mismatch) styled to match login page -->
     <div th:if="${#fields.hasGlobalErrors()}" th:each="e : ${#fields.globalErrors()}"
          class="text-danger" th:text="${e}"></div>
 
     <button type="submit" class="btn btn-primary mt-3">Register</button>
   </form>
 
-  <!-- optional success or info message area -->
+  <!-- team: optional success or info message area -->
   <p th:if="${message}" class="mt-3" th:text="${message}"></p>
 
-  <!-- link to login page -->
+  <!-- team: link to login page -->
   <p class="mt-3">
     <a th:href="@{/login}">Already have an account? Login here</a>
   </p>

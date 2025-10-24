@@ -3,9 +3,11 @@
 <head><title>Forgot Password</title></head>
 <body>
 <h2>Forgot Password</h2>
+
+<!-- Update (M6): allow email OR username -->
 <form th:action="@{/forgot}" method="post">
-  <label>Email</label>
-  <input type="email" name="email" required />
+  <label>Email or Username</label>
+  <input type="text" name="identifier" required />
   <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
   <button type="submit">Send Reset Link</button>
 </form>

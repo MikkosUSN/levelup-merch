@@ -1,3 +1,4 @@
+// src/main/java/com/clc/levelup/repository/UserRepository.java
 package com.clc.levelup.repository;
 
 import java.util.Optional;
@@ -18,6 +19,12 @@ public interface UserRepository extends CrudRepository<User, Long> {
     /** Check if email already exists. */
     boolean existsByEmail(String email);
 
-    // Update (M6): email lookup used by password reset flow
+    // Update: case-insensitive find & existence checks (handy with mixed input)
+    Optional<User> findByEmailIgnoreCase(String email);
+    Optional<User> findByUsernameIgnoreCase(String username);
+    boolean existsByEmailIgnoreCase(String email);
+    boolean existsByUsernameIgnoreCase(String username);
+
+    // Update: email lookup used by password reset flow (explicit keep)
     Optional<User> findByEmail(String email);
 }

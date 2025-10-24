@@ -24,7 +24,11 @@ public class PasswordResetToken {
   private LocalDateTime expiresAt;
 
   @Column("used")
-  private Integer used; // 0 = not used, 1 = used
+  private Boolean used; // Update (M6): map to Boolean to match JDBC result for TINYINT(1)
+
+  // Update (M6): track when token was created (for cleanup and logging)
+  @Column("created_at")
+  private LocalDateTime createdAt;
 
   public Long getId() { return id; }
   public void setId(Long id) { this.id = id; }
@@ -38,6 +42,13 @@ public class PasswordResetToken {
   public LocalDateTime getExpiresAt() { return expiresAt; }
   public void setExpiresAt(LocalDateTime expiresAt) { this.expiresAt = expiresAt; }
 
-  public Integer getUsed() { return used; }
-  public void setUsed(Integer used) { this.used = used; }
+  public Boolean getUsed() { return used; }
+  public void setUsed(Boolean used) { this.used = used; }
+
+  public LocalDateTime getCreatedAt() { return createdAt; }
+  public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+  // Update (M6): helpers keep calling code tidy
+  public boolean isUsed() { return Boolean.TRUE.equals(used); }
+  public boolean isExpired() { return expiresAt != null && expiresAt.isBefore(LocalDateTime.now()); }
 }

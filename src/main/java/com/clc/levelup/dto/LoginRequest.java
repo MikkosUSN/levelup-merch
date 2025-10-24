@@ -2,13 +2,15 @@ package com.clc.levelup.dto;
 
 import javax.validation.constraints.NotBlank;
 
-// Login form data: either email or username + password.
+/*
+ * Team: Login form data (either email or username + password).
+ */
 public class LoginRequest {
 
-  @NotBlank // required
+  @NotBlank(message = "Please enter your email or username.")
   private String emailOrUsername;
 
-  @NotBlank // required
+  @NotBlank(message = "Please enter your password.")
   private String password;
 
   public String getEmailOrUsername() { return emailOrUsername; }

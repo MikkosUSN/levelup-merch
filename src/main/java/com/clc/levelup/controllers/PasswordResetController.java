@@ -2,7 +2,7 @@ package com.clc.levelup.controllers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.springframework.beans.factory.annotation.Value;               // Update (M6): dev toggle
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -11,14 +11,17 @@ import com.clc.levelup.security.PasswordResetService;
 
 /*
  * Handles /forgot and /reset routes.
- * Logs the reset URL to console for local testing.
+ * Logs the reset URL for local testing.
  */
 @Controller
 public class PasswordResetController {
 
   private static final Logger log = LoggerFactory.getLogger(PasswordResetController.class);
-
   private final PasswordResetService resetService;
+
+  // Update (M6): dev-only option to show the link on the page (not just console)
+  @Value("${app.showResetLinkInUi:false}")
+  private boolean showResetLinkInUi;
 
   public PasswordResetController(PasswordResetService resetService) {
     this.resetService = resetService;
@@ -26,22 +29,25 @@ public class PasswordResetController {
 
   @GetMapping("/forgot")
   public String showForgotForm() {
-    return "auth/forgot"; // simple form with email field
+    return "auth/forgot";
   }
 
+  // Update (M6): accept identifier (email or username)
   @PostMapping("/forgot")
-  public String handleForgot(@RequestParam("email") String email, Model model) {
-    var tokenOpt = resetService.createTokenForEmail(email);
-    if (tokenOpt.isEmpty()) {
-      model.addAttribute("message", "If the email exists, a reset link has been created.");
-      return "auth/forgot-done";
+  public String handleForgot(@RequestParam("identifier") String identifier, Model model) {
+    var tokenOpt = resetService.createTokenForIdentifier(identifier);
+
+    // Always generic (no account enumeration)
+    model.addAttribute("message", "If the email exists, a reset link has been created.");
+
+    // Log token for local testing
+    tokenOpt.ifPresent(tok -> log.info("Password reset link (dev): /reset?token={}", tok.getToken()));
+
+    // Optional: in dev, also show the link directly on the page
+    if (showResetLinkInUi && tokenOpt.isPresent()) {
+      model.addAttribute("devLink", "/reset?token=" + tokenOpt.get().getToken());
     }
 
-    var token = tokenOpt.get().getToken();
-    var link = "/reset?token=" + token; // local dev: relative path
-    log.info("Password reset link (dev): {}", link);
-
-    model.addAttribute("message", "A reset link has been generated (see server console).");
     return "auth/forgot-done";
   }
 
@@ -53,7 +59,7 @@ public class PasswordResetController {
       return "auth/reset-error";
     }
     model.addAttribute("token", token);
-    return "auth/reset"; // form with password + confirm + hidden token
+    return "auth/reset";
   }
 
   @PostMapping("/reset")
