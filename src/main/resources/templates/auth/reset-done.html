@@ -1,8 +1,19 @@
 <!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/_layout :: layout}">
+<head>
+  <title>Reset Done</title> <!-- team note: simple title for this page -->
+</head>
+<body>
+  <!-- Page body provided to layout -->
+  <div th:fragment="content">
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head><title>Password Updated</title></head>
 <body>
 <p th:text="${message}">Password updated.</p>
 <p><a th:href="@{/login}">Go to login</a></p>
+</body>
+</html>
+  </div>
 </body>
 </html>

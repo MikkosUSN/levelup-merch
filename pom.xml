@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?> 
+<?xml version="1.0" encoding="UTF-8"?>
 <!-- Team Note:
-     Updated project build file. 
-     Java 17 / Spring Boot 2.7.18 with Web, Thymeleaf, Validation, JDBC, MySQL, and Security. 
-     Update (M6): Added spring-security-test for WebMvc tests (@WithMockUser, etc.). -->
+     Project build file.
+     Java 17 / Spring Boot 2.7.18 with Web, Thymeleaf, Validation, JDBC, MySQL, and Security.
+     Team note: includes spring-security-test for MockMvc (@WithMockUser, etc.). -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -48,7 +48,7 @@
       <artifactId>spring-boot-starter-security</artifactId>
     </dependency>
 
-    <!-- Thymeleaf Security Tags -->
+    <!-- Thymeleaf Security Tags (sec:authorize, sec:authentication, etc.) -->
     <dependency>
       <groupId>org.thymeleaf.extras</groupId>
       <artifactId>thymeleaf-extras-springsecurity5</artifactId>
@@ -75,7 +75,7 @@
       </exclusions>
     </dependency>
 
-    <!-- Update (M6): Spring Security Test helpers for MockMvc and annotations -->
+    <!-- Team note: Spring Security Test helpers for MockMvc and annotations -->
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-test</artifactId>
@@ -88,11 +88,10 @@
       <artifactId>spring-boot-starter-data-jdbc</artifactId>
     </dependency>
 
-    <!-- MySQL driver -->
+    <!-- MySQL driver (modern coordinates). Version is managed by Spring Boot; no explicit version needed. -->
     <dependency>
-      <groupId>mysql</groupId>
-      <artifactId>mysql-connector-java</artifactId>
-      <version>8.0.33</version>
+      <groupId>com.mysql</groupId>
+      <artifactId>mysql-connector-j</artifactId>
       <scope>runtime</scope>
     </dependency>
   </dependencies>

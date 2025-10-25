@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="https://www.thymeleaf.org/extras/spring-security"  <!-- Team note: enables sec:* tags -->
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security"
       th:fragment="layout">
 <head>
   <meta charset="UTF-8">
@@ -55,56 +55,51 @@
         </li> <!-- Link to Checkout -->
       </ul>
 
-      <!-- RIGHT side: moved Orders over here to match the original site layout -->
+      <!-- RIGHT side -->
       <ul class="navbar-nav ms-auto">
-        <!-- Team note (NEW): Orders is visible only when authenticated -->
+        <!-- Show Login/Register when not logged in.
+             Supports either legacy model flags OR Spring Security. -->
+        <li class="nav-item"
+            th:if="${loggedInUser == null and currentUser == null}"
+            sec:authorize="isAnonymous()">
+          <a class="nav-link" th:href="@{/login}"
+             th:classappend="${#httpServletRequest.requestURI.startsWith('/login')} ? ' active' : ''">Login</a>
+        </li>
+        <li class="nav-item"
+            th:if="${loggedInUser == null and currentUser == null}"
+            sec:authorize="isAnonymous()">
+          <a class="nav-link" th:href="@{/register}"
+             th:classappend="${#httpServletRequest.requestURI.startsWith('/register')} ? ' active' : ''">Register</a>
+        </li>
+
+        <!-- Orders visible only when authenticated -->
         <li class="nav-item" sec:authorize="isAuthenticated()">
           <a class="nav-link"
              th:href="@{/orders}"
              th:classappend="${#httpServletRequest.requestURI.startsWith('/orders')} ? ' active' : ''">Orders</a>
         </li>
 
-        <!-- Show Login/Register when not logged in.
-             Supports either legacy model flags OR Spring Security. -->
-        <li class="nav-item"
-            th:if="${loggedInUser == null and currentUser == null}"
-            sec:authorize="isAnonymous()">
-          <a class="nav-link" th:href="@{/login}">Login</a>
-        </li>
-        <li class="nav-item"
-            th:if="${loggedInUser == null and currentUser == null}"
-            sec:authorize="isAnonymous()">
-          <a class="nav-link" th:href="@{/register}">Register</a>
-        </li>
-
-        <!-- Show greeting when logged in.
+        <!-- Show greeting when logged in (replaces Profile link).
              Username source priority:
              1) Spring Security principal name (sec:authentication)
              2) 'loggedInUser' model attr
              3) 'currentUser' model attr -->
-        <li class="nav-item d-flex align-items-center"
-            th:if="${loggedInUser != null or currentUser != null}"
-            sec:authorize="isAuthenticated()">
-          <!-- Team note: print a plain username string; no object toString leakage -->
-          <span class="nav-link mb-0">
-            Hello,
+        <li class="nav-item d-flex align-items-center" sec:authorize="isAuthenticated()">
+          <!-- Team update: We mark the greeting as 'active' so it visually matches other right-side items -->
+          <a class="nav-link active mb-0" href="#">
             <b>
               <span sec:authentication="name">User</span>
               <span th:if="${loggedInUser != null}" th:text="${loggedInUser}"></span>
               <span th:if="${loggedInUser == null and currentUser != null}" th:text="${currentUser}"></span>
             </b>
-          </span>
+          </a>
         </li>
 
-        <!-- Logout should be a POST for CSRF safety (Spring Security default).
-             The button only renders for authenticated users. -->
-        <li class="nav-item"
-            th:if="${loggedInUser != null or currentUser != null}"
-            sec:authorize="isAuthenticated()">
-          <form th:action="@{/logout}" method="post" class="d-inline">
-            <!-- Team note: include CSRF token so logout POST succeeds -->
+        <!-- Logout link submits a hidden POST form (keeps CSRF + matches navbar spacing) -->
+        <li class="nav-item" sec:authorize="isAuthenticated()">
+          <a class="nav-link" href="#" onclick="document.getElementById('logoutForm').submit(); return false;">Logout</a>
+          <form id="logoutForm" th:action="@{/logout}" method="post" class="d-none">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-            <button type="submit" class="nav-link btn btn-link p-0">Logout</button>
           </form>
         </li>
       </ul>

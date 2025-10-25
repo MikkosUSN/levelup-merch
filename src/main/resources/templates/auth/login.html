@@ -1,82 +1,82 @@
 <!-- src/main/resources/templates/auth/login.html -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="fragments/_layout :: layout">
+th:replace="fragments/_layout :: layout">
 <head>
-  <title>Login - Level Up Game Merch Store</title> <!-- clearer page title -->
+<title>Login - Level Up Game Merch Store</title> <!-- clearer page title -->
 </head>
 <body>
 <div th:fragment="content" class="container mt-4">
-  <!-- Page-scope wrapper so CSS can target only this page if needed -->
-  <div class="login-page">
+<!-- Page-scope wrapper so CSS can target only this page if needed -->
+<div class="login-page">
 
-    <h2>Login</h2>
+<h2>Login</h2>
 
     <!-- Update: show Spring Security feedback based on query params -->
-    <div th:if="${param.error}" class="alert alert-danger mb-3">
-      Invalid username/email or password. Please try again.
-    </div>
-    <div th:if="${param.logout}" class="alert alert-info mb-3">
-      You have been logged out.
-    </div>
+<div th:if="${param.error}" class="alert alert-danger mb-3">
+Invalid username/email or password. Please try again.
+</div>
+<div th:if="${param.logout}" class="alert alert-info mb-3">
+You have been logged out.
+</div>
 
     <!--
       Bind to LoginRequest (fields: emailOrUsername, password).
       Keep action path and add CSRF token for Spring Security form login.
       If SecurityConfig uses a custom usernameParameter, keep the field name 'emailOrUsername'.
     -->
-    <form th:action="@{/login}" th:object="${loginRequest}" method="post" class="form">
+<form th:action="@{/login}" th:object="${loginRequest}" method="post" class="form">
 
       <!-- Username or Email -->
-      <div class="mb-3">
-        <label class="form-label">Username or Email:</label>
-        <input type="text"
-               th:field="*{emailOrUsername}"
-               class="form-control"
-               placeholder="Enter your username or email"
-               required />
-        <div th:if="${#fields.hasErrors('emailOrUsername')}"
-             th:errors="*{emailOrUsername}"
-             class="text-danger"></div>
-      </div>
+<div class="mb-3">
+<label class="form-label">Username or Email:</label>
+<input type="text"
+th:field="*{emailOrUsername}"
+class="form-control"
+placeholder="Enter your username or email"
+required />
+<div th:if="${#fields.hasErrors('emailOrUsername')}"
+th:errors="*{emailOrUsername}"
+class="text-danger"></div>
+</div>
 
       <!-- Password -->
-      <div class="mb-3">
-        <label class="form-label">Password:</label>
-        <input type="password"
-               th:field="*{password}"
-               class="form-control"
-               placeholder="Enter your password"
-               required />
-        <div th:if="${#fields.hasErrors('password')}"
-             th:errors="*{password}"
-             class="text-danger"></div>
-      </div>
+<div class="mb-3">
+<label class="form-label">Password:</label>
+<input type="password"
+th:field="*{password}"
+class="form-control"
+placeholder="Enter your password"
+required />
+<div th:if="${#fields.hasErrors('password')}"
+th:errors="*{password}"
+class="text-danger"></div>
+</div>
 
       <!-- CSRF hidden field for secure POST -->
-      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-      <button type="submit" class="btn btn-primary">Login</button>
-    </form>
+<button type="submit" class="btn btn-primary">Login</button>
+</form>
 
-    <!-- Global errors produced by BindingResult (e.g., auth.invalid) -->
-    <div th:if="${#fields.hasGlobalErrors()}" th:each="e : ${#fields.globalErrors()}"
-         class="alert alert-danger mt-3" th:text="${e}"></div>
+<!-- Global errors produced by BindingResult (e.g., auth.invalid) -->
+<div th:if="${#fields.hasGlobalErrors()}" th:each="e : ${#fields.globalErrors()}"
+class="alert alert-danger mt-3" th:text="${e}"></div>
 
     <!-- Optional message area -->
-    <p th:if="${message}" class="mt-3 text-warning" th:text="${message}"></p>
+<p th:if="${message}" class="mt-3 text-warning" th:text="${message}"></p>
 
     <!-- Password reset entry point -->
-    <p class="mt-3">
-      <a th:href="@{/forgot}">Forgot your password?</a>
-    </p>
+<p class="mt-3">
+<a th:href="@{/forgot}">Forgot your password?</a>
+</p>
 
     <!-- Link to registration page -->
-    <p class="mt-3">
-      <a th:href="@{/register}">Don’t have an account? Register here</a>
-    </p>
+<p class="mt-3">
+<a th:href="@{/register}">Don’t have an account? Register here</a>
+</p>
 
-  </div> <!-- /.login-page -->
+</div> <!-- /.login-page -->
 </div>
 </body>
 </html>
