@@ -1,4 +1,3 @@
-// src/main/java/com/clc/levelup/security/CustomUserDetailsService.java
 package com.clc.levelup.security;
 
 import java.util.Collection;
@@ -39,6 +38,9 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String emailOrUsername) throws UsernameNotFoundException {
+        // Log who is being authenticated to make the logger useful
+        log.info("Attempting authentication for identifier: {}", emailOrUsername);
+
         String raw = safe(emailOrUsername);
 
         // Prefer email if it looks like one
@@ -69,7 +71,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .build();
     }
 
-    // Read roles for a user id and convert to SimpleGrantedAuthority.
+    // Reads roles for a user id and converts them to SimpleGrantedAuthority.
     private List<GrantedAuthority> loadAuthorities(Long userId) {
         return jdbc.query(
                 "SELECT r.name AS role_name " +

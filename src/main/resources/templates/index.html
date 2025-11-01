@@ -4,7 +4,7 @@
 <!-- Team note: we render into the shared layout by replacing <html> with the fragment below -->
 <html th:replace="~{fragments/_layout :: layout}" xmlns:th="http://www.thymeleaf.org">
 <head>
-<title>Level Up Game Merch Store</title> <!-- clearer title -->
+  <title>Level Up Game Merch Store</title> <!-- clearer title -->
 </head>
 <body>
   <!-- Home page layout -->
@@ -16,15 +16,22 @@
       <!-- Short store blurb -->
       <p class="lead mb-4">Explore exclusive game merchandise — t-shirts, collectibles, and more!</p>
       <!-- view products (centered main action) -->
-      <p><a class="btn btn-outline-primary btn-lg" th:href="@{/products}">View Products</a></p> <!-- centered main button -->
+      <p>
+        <a class="btn btn-outline-primary btn-lg" th:href="@{/products}">View Products</a>
+      </p> <!-- centered main button -->
     </section>
+
     <!-- Left-aligned quick links under hero -->
     <!-- Team note: small links live left; leave them simple for now -->
     <section class="text-start">
       <p class="mb-1"><a th:href="@{/login}">Login</a></p>
       <p class="mb-1"><a th:href="@{/register}">Register</a></p>
       <p class="mb-1"><a th:href="@{/products/new}">Create Product</a></p> <!-- uses our route (/products/new) -->
+      <!-- Update (M7): add links to new cart and orders pages -->
+      <p class="mb-1"><a th:href="@{/cart}">View Cart</a></p>
+      <p class="mb-1"><a th:href="@{/orders}">View Orders</a></p>
     </section>
+
     <!-- Note: header/nav/footer come from layout; no duplicate markup here -->
   </div>
 </body>

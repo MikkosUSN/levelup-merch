@@ -1,4 +1,3 @@
-// src/main/java/com/clc/levelup/repository/UserRepository.java
 package com.clc.levelup.repository;
 
 import java.util.Optional;

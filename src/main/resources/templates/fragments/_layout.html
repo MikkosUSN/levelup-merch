@@ -43,11 +43,22 @@
              th:href="@{/products}"
              th:classappend="${#httpServletRequest.requestURI.startsWith('/products')} ? ' active' : ''">Products</a>
         </li>
-        <li class="nav-item">
+
+        <!-- Update (M7): mini-cart badge next to Cart.
+             - Badge shows only when cartCount > 0
+             - Works for anonymous or authenticated users (ControllerAdvice supplies cartCount) -->
+        <li class="nav-item position-relative">
           <a class="nav-link"
              th:href="@{/cart}"
-             th:classappend="${#httpServletRequest.requestURI.startsWith('/cart')} ? ' active' : ''">Cart</a>
+             th:classappend="${#httpServletRequest.requestURI.startsWith('/cart')} ? ' active' : ''">
+            Cart
+            <!-- New: badge (hidden when null/0). We keep it light and unobtrusive. -->
+            <span class="badge bg-primary ms-1"
+                  th:if="${cartCount != null and cartCount > 0}"
+                  th:text="${cartCount}">1</span>
+          </a>
         </li>
+
         <li class="nav-item">
           <a class="nav-link"
              th:href="@{/checkout}"

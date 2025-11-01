@@ -2,7 +2,6 @@ package com.clc.levelup.controllers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;               // Update (M6): dev toggle
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -19,10 +18,6 @@ public class PasswordResetController {
   private static final Logger log = LoggerFactory.getLogger(PasswordResetController.class);
   private final PasswordResetService resetService;
 
-  // Update (M6): dev-only option to show the link on the page (not just console)
-  @Value("${app.showResetLinkInUi:false}")
-  private boolean showResetLinkInUi;
-
   public PasswordResetController(PasswordResetService resetService) {
     this.resetService = resetService;
   }
@@ -32,21 +27,28 @@ public class PasswordResetController {
     return "auth/forgot";
   }
 
-  // Update (M6): accept identifier (email or username)
   @PostMapping("/forgot")
   public String handleForgot(@RequestParam("identifier") String identifier, Model model) {
     var tokenOpt = resetService.createTokenForIdentifier(identifier);
 
-    // Always generic (no account enumeration)
+    // Generic message (no account enumeration)
     model.addAttribute("message", "If the email exists, a reset link has been created.");
 
-    // Log token for local testing
-    tokenOpt.ifPresent(tok -> log.info("Password reset link (dev): /reset?token={}", tok.getToken()));
+    // Always log what happened so it's obvious in the console
+    tokenOpt.ifPresentOrElse(tok -> {
+      String link = "/reset?token=" + tok.getToken();
+      // Log via SLF4J
+      log.info("Password reset link (dev): {}", link);
+      // Also print to stdout so it appears in any console setup
+      System.out.println("[DEV] Password reset link: " + link);
 
-    // Optional: in dev, also show the link directly on the page
-    if (showResetLinkInUi && tokenOpt.isPresent()) {
-      model.addAttribute("devLink", "/reset?token=" + tokenOpt.get().getToken());
-    }
+      // Put link + token on page for fast testing
+      model.addAttribute("devLink", link);
+      model.addAttribute("token", tok.getToken());
+    }, () -> {
+      log.info("No reset token created. Identifier did not match an account.");
+      System.out.println("[DEV] No reset token created (identifier not found).");
+    });
 
     return "auth/forgot-done";
   }
