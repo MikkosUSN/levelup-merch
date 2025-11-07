@@ -16,28 +16,38 @@ import com.clc.levelup.model.User;
 import com.clc.levelup.service.AuthService;
 
 /**
- * Login flow (no DB/security yet).
- * On success, stores a simple principal in the HTTP session under key "principal".
+ * Handles the login form workflow.
+ * On success, stores a simple username in the HTTP session under both
+ * "principal" (legacy) and "currentUser" (used by templates).
  */
 @Controller
 public class LoginController {
 
     private final AuthService auth;
 
+    /**
+     * Create a LoginController with an AuthService dependency.
+     * @param auth authentication service used to verify credentials
+     */
     public LoginController(AuthService auth) {
         this.auth = auth;
     }
 
+    /**
+     * Display the login page. Accepts an optional info message, e.g., after logout or registration.
+     * @param model MVC model
+     * @param message optional informational message to display on the page
+     * @return login view name
+     */
     @GetMapping("/login")
     public String showLogin(Model model,
-                            // simple message support (optional, after logout or registration)
                             @RequestParam(value = "message", required = false) String message) {
-        // Backing object for the form (fields: emailOrUsername, password)
+        // Ensure a backing object exists for the form
         if (!model.containsAttribute("loginRequest")) {
             model.addAttribute("loginRequest", new LoginRequest());
         }
 
-        // Pass through optional info message
+        // Pass through any optional message
         if (message != null && !message.isBlank()) {
             model.addAttribute("message", message);
         }
@@ -45,44 +55,46 @@ public class LoginController {
         return "auth/login";
     }
 
+    /**
+     * Process the submitted login form.
+     * Validates fields, authenticates via AuthService, and on success stores a friendly username in session.
+     * @param form validated login request DTO
+     * @param result binding/validation result
+     * @param session active HTTP session
+     * @param model MVC model
+     * @return redirect to /products on success, or redisplay login on error
+     */
     @PostMapping("/login")
     public String processLogin(@Valid @ModelAttribute("loginRequest") LoginRequest form,
                                BindingResult result,
                                HttpSession session,
                                Model model) {
 
-        // Field-level validation errors
+        // Return to the form if field-level validation failed
         if (result.hasErrors()) {
             return "auth/login";
         }
 
-        // Use in-memory AuthService
+        // Authenticate against the in-memory AuthService
         if (!auth.authenticate(form)) {
-            // Global error uses messages.properties key if needed
+            // Global error key (messages.properties can map "auth.invalid" to a friendly message)
             result.reject("auth.invalid");
-
-            // Removed the "error" attribute as requested
+            // Friendly inline message for the view
             model.addAttribute("message", "Invalid credentials, please try again.");
-
             return "auth/login";
         }
 
-        // Success: stash a simple principal in session for navbar/menu state
-        // Team note (M4): ensure we store a FRIENDLY STRING (username), not the full User object.
+        // Success: resolve a display-friendly principal (username string)
         Object principal = auth.toPrincipal(form.getEmailOrUsername());
-        String displayName;
-        if (principal instanceof User) {
-            displayName = ((User) principal).getUsername();
-        } else {
-            // Fallback: whatever AuthService returned, turn into a string.
-            displayName = String.valueOf(principal);
-        }
+        String displayName = (principal instanceof User)
+                ? ((User) principal).getUsername()
+                : String.valueOf(principal);
 
-        // Keep legacy "principal" key for compatibility AND add "currentUser" for templates.
+        // Keep both keys: "principal" (legacy) and "currentUser" (used by GlobalModelAttributes / templates)
         session.setAttribute("principal", displayName);
-        session.setAttribute("currentUser", displayName);  // used by GlobalModelAttributes + navbar
+        session.setAttribute("currentUser", displayName);
 
-        // Redirect to products after successful login
+        // Send the user to the catalog after a successful login
         return "redirect:/products";
     }
 }

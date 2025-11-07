@@ -1,73 +1,84 @@
-// src/main/java/com/clc/levelup/service/UserService.java
 package com.clc.levelup.service;
 
 import java.util.Optional;
-
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import com.clc.levelup.dto.UserRegistration; // simple DTO used by emulateCreate(..)
+import com.clc.levelup.dto.UserRegistration;
 import com.clc.levelup.model.Role;
 import com.clc.levelup.model.User;
 import com.clc.levelup.repository.RoleRepository;
 import com.clc.levelup.repository.UserRepository;
 
-/*
- * Handles registration and simple lookups.
- * We attach ROLE_USER after saving a new account.
+/**
+ * Handles user registration, lookups, and account validation.
+ * <p>
+ * This service manages new user creation and attaches default roles.
+ * Controllers and authentication services depend on this class for
+ * all user-related operations.
+ * </p>
  */
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-    private final JdbcTemplate jdbcTemplate; // used for user_roles join insert
-    private final PasswordEncoder passwordEncoder; // Update
+    private final JdbcTemplate jdbcTemplate;
+    private final PasswordEncoder passwordEncoder;
 
-    /** Spring injects the repositories + JdbcTemplate. */
+    /**
+     * Constructs a {@code UserService} with repositories and helpers injected by Spring.
+     * @param userRepository user data repository
+     * @param roleRepository role data repository
+     * @param jdbcTemplate used for user-role join inserts
+     * @param passwordEncoder encoder for hashing passwords
+     */
     public UserService(UserRepository userRepository,
                        RoleRepository roleRepository,
                        JdbcTemplate jdbcTemplate,
-                       PasswordEncoder passwordEncoder) { // Update
+                       PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.jdbcTemplate = jdbcTemplate;
-        this.passwordEncoder = passwordEncoder; // Update
+        this.passwordEncoder = passwordEncoder;
     }
 
     /**
-     * Register a new user.
-     * Steps:
-     *  1) Block duplicate usernames/emails.
-     *  2) Save the user (hash password).
-     *  3) Attach ROLE_USER in user_roles.
-     * @throws IllegalArgumentException if username/email already used
+     * Register a new user account.
+     * <p>Steps:</p>
+     * <ol>
+     *   <li>Normalize and validate username and email.</li>
+     *   <li>Check for duplicates (case-insensitive).</li>
+     *   <li>Hash the password before saving.</li>
+     *   <li>Assign the default {@code ROLE_USER} role.</li>
+     * </ol>
+     * @param username desired username
+     * @param rawPassword plain text password to be hashed
+     * @param email user email address
+     * @return saved {@link User} record
+     * @throws IllegalArgumentException if username or email already exists
      */
     public User register(String username, String rawPassword, String email) {
-        // Update: normalize inputs (trim; lowercase email)
         final String normUsername = safe(username);
         final String normEmail = safe(email).toLowerCase();
 
-        // Accept either DB or explicit case-insensitive checks
-        if (existsByUsernameIgnoreCase(normUsername)) { // Update
+        // Prevent duplicates
+        if (existsByUsernameIgnoreCase(normUsername)) {
             throw new IllegalArgumentException("Username already exists.");
         }
-        if (existsByEmailIgnoreCase(normEmail)) { // Update
+        if (existsByEmailIgnoreCase(normEmail)) {
             throw new IllegalArgumentException("Email already in use.");
         }
 
-        // Hash password before save
+        // Hash password and save
         String hashed = passwordEncoder.encode(rawPassword);
-
-        // Save user; Spring Data sets the id on returned object.
         User saved = userRepository.save(new User(normUsername, hashed, normEmail, true));
 
-        // Look up ROLE_USER (seeded in DDL).
+        // Fetch ROLE_USER
         Role roleUser = roleRepository.findByName("ROLE_USER")
                 .orElseThrow(() -> new IllegalStateException("ROLE_USER missing in roles table"));
 
-        // Insert join row so this user has ROLE_USER.
+        // Assign role to new user
         jdbcTemplate.update(
                 "INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)",
                 saved.getId(), roleUser.getId()
@@ -76,72 +87,106 @@ public class UserService {
         return saved;
     }
 
-    /** Find a user by username (legacy helper). */
+    /**
+     * Find a user by username (case-sensitive).
+     * @param username the username to search for
+     * @return optional containing user if found
+     */
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(safe(username));
     }
 
-    // ===== Compatibility helpers used by controllers =====
+    // ===== Validation Helpers =====
 
-    /** Simple delegate used by existing validations in controllers/config. */
+    /**
+     * Check if an email already exists.
+     * @param email email to check
+     * @return true if the email is already used
+     */
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmail(safe(email).toLowerCase());
     }
 
-    /** Simple delegate used by existing validations in controllers/config. */
+    /**
+     * Check if a username already exists.
+     * @param username username to check
+     * @return true if the username already exists
+     */
     public boolean existsByUsername(String username) {
         return userRepository.existsByUsername(safe(username));
     }
 
-    // Update: new case-insensitive helpers to satisfy RegisterController usage
+    /**
+     * Case-insensitive email check used by registration forms.
+     * @param email email address
+     * @return true if email exists (ignoring case)
+     */
     public boolean existsByEmailIgnoreCase(String email) {
         return userRepository.existsByEmailIgnoreCase(safe(email));
     }
 
+    /**
+     * Case-insensitive username check used by registration forms.
+     * @param username username
+     * @return true if username exists (ignoring case)
+     */
     public boolean existsByUsernameIgnoreCase(String username) {
         return userRepository.existsByUsernameIgnoreCase(safe(username));
     }
 
     /**
-     * Lookup by username OR email (handy for login).
+     * Find a user by either username or email (case-insensitive).
+     * Used for login and password reset.
+     * @param input username or email
+     * @return optional containing matching user, if found
      */
     public Optional<User> findByEmailOrUsername(String input) {
         final String v = safe(input);
-        // Try username (strict), then username (ignore case), then email (ignore case)
+
         Optional<User> byUser = userRepository.findByUsername(v);
         if (byUser.isPresent()) return byUser;
 
-        byUser = userRepository.findByUsernameIgnoreCase(v); // Update
+        byUser = userRepository.findByUsernameIgnoreCase(v);
         if (byUser.isPresent()) return byUser;
 
-        Optional<User> byEmail = userRepository.findByEmailIgnoreCase(v); // Update
+        Optional<User> byEmail = userRepository.findByEmailIgnoreCase(v);
         if (byEmail.isPresent()) return byEmail;
 
-        // Fallback: tiny JDBC email query (kept for compatibility, lowercased)
+        // Fallback: small direct JDBC query for compatibility
         return jdbcTemplate.query(
                 "SELECT id, username, password, email, enabled FROM users WHERE LOWER(email) = ? LIMIT 1",
                 rs -> rs.next()
-                        ? Optional.of(mapRowToUser(rs.getLong("id"),
-                                                   rs.getString("username"),
-                                                   rs.getString("password"),
-                                                   rs.getString("email"),
-                                                   rs.getBoolean("enabled")))
+                        ? Optional.of(mapRowToUser(
+                            rs.getLong("id"),
+                            rs.getString("username"),
+                            rs.getString("password"),
+                            rs.getString("email"),
+                            rs.getBoolean("enabled")))
                         : Optional.empty(),
                 v.toLowerCase()
         );
     }
 
-    /** Keeps older controller code that calls emulateCreate(dto). */
+    /**
+     * Legacy helper that mimics earlier registration logic for DTO-based calls.
+     * @param dto user registration data
+     * @return saved user entity
+     */
     public User emulateCreate(UserRegistration dto) {
         return register(safe(dto.getUsername()), safe(dto.getPassword()), safe(dto.getEmail()));
     }
 
-    // Small helper to map a JDBC row to our User model.
+    // ===== Internal Helpers =====
+
+    /** Convert a JDBC row into a {@link User} model object. */
     private User mapRowToUser(Long id, String username, String password, String email, boolean enabled) {
         User u = new User(username, password, email, enabled);
         u.setId(id);
         return u;
     }
 
-    private String safe(String s) { return s == null ? "" : s.trim(); }
+    /** Trim a string and return an empty value if null. */
+    private String safe(String s) {
+        return s == null ? "" : s.trim();
+    }
 }

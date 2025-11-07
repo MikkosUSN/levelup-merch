@@ -1,51 +1,59 @@
 package com.clc.levelup.model;
 
-import java.math.BigDecimal;                         // M4 update: use BigDecimal for money
+import java.math.BigDecimal;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.format.annotation.NumberFormat;
 
-/*
- * Team note:
- * Product maps to the products table. Keep this class simple (no business rules).
- *
- * M4 updates:
- *  - We added a real "category" field (kept "manufacturer" as the brand/maker).
- *  - We standardized on "price" and "partNumber" to match the DB and templates.
- *  - "partNumber" is a camelCase DB column; we map it explicitly with @Column.
- *  - Price now uses BigDecimal + @NumberFormat so we show exactly 2 decimals.
+/**
+ * Represents a product record mapped to the {@code products} table.
+ * This class contains only state and accessor methods—no business logic.
+ * Used by the ProductService and ProductController layers.
  */
 @Table("products")
 public class Product {
 
+    /** Primary key identifier in the database. */
     @Id
-    private Long id; // database identity
+    private Long id;
 
+    /** Display name of the product. */
     private String name;
+
+    /** Short description for marketing or catalog display. */
     private String description;
 
-    /** Brand or maker */
+    /** Manufacturer or brand name. */
     private String manufacturer;
 
-    /** Store category (e.g., Apparel, Accessories, Collectibles) */
+    /** Category grouping (e.g., Apparel, Accessories, Collectibles). */
     private String category;
 
-    /** CamelCase column in DB; mapped explicitly so Spring Data uses it verbatim */
+    /** Product part number, mapped explicitly to preserve camel-case column name. */
     @Column("partNumber")
     private String partNumber;
 
-    /** Units we have in stock */
+    /** Current stock quantity. */
     private int quantity;
 
-    /** Unit price (USD) */
-    @NumberFormat(pattern = "0.00")            // M4 update: ensures two-decimal display/parse
+    /** Unit price in USD, formatted to show two decimal places. */
+    @NumberFormat(pattern = "0.00")
     private BigDecimal price;
 
-    /** Empty constructor required by Spring Data */
+    /** Default constructor required by Spring Data. */
     public Product() { }
 
-    /** Convenience constructor for tests/seeds */
+    /**
+     * Convenience constructor for manual creation, tests, or seeding.
+     * @param name product name
+     * @param description short description
+     * @param manufacturer brand or maker
+     * @param category category label
+     * @param partNumber internal or vendor part number
+     * @param quantity units in stock
+     * @param price unit price
+     */
     public Product(String name, String description, String manufacturer,
                    String category, String partNumber, int quantity, BigDecimal price) {
         this.name = name;
@@ -57,36 +65,53 @@ public class Product {
         this.price = price;
     }
 
-    // --- Getters/Setters ---
+    // ----- Getters and Setters -----
 
+    /** Get the product ID. */
     public Long getId() { return id; }
+
+    /** Set the product ID. */
     public void setId(Long id) { this.id = id; }
 
-    /** Product display name. */
+    /** Get the product name. */
     public String getName() { return name; }
+
+    /** Set the product name. */
     public void setName(String name) { this.name = name; }
 
-    /** Short marketing copy. */
+    /** Get the product description. */
     public String getDescription() { return description; }
+
+    /** Set the product description. */
     public void setDescription(String description) { this.description = description; }
 
-    /** Brand or maker of the item. */
+    /** Get the manufacturer or brand. */
     public String getManufacturer() { return manufacturer; }
+
+    /** Set the manufacturer or brand. */
     public void setManufacturer(String manufacturer) { this.manufacturer = manufacturer; }
 
-    /** Store category for filtering and display. */
+    /** Get the product category. */
     public String getCategory() { return category; }
+
+    /** Set the product category. */
     public void setCategory(String category) { this.category = category; }
 
-    /** Internal or vendor part number. */
+    /** Get the product part number. */
     public String getPartNumber() { return partNumber; }
+
+    /** Set the product part number. */
     public void setPartNumber(String partNumber) { this.partNumber = partNumber; }
 
-    /** Inventory count. */
+    /** Get the available quantity. */
     public int getQuantity() { return quantity; }
+
+    /** Set the available quantity. */
     public void setQuantity(int quantity) { this.quantity = quantity; }
 
-    /** Unit price in USD. */
+    /** Get the unit price. */
     public BigDecimal getPrice() { return price; }
+
+    /** Set the unit price. */
     public void setPrice(BigDecimal price) { this.price = price; }
 }

@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-// Only import Spring Security's User class to avoid collision with your domain model
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -19,9 +18,12 @@ import org.springframework.stereotype.Service;
 
 import com.clc.levelup.repository.UserRepository;
 
-/*
- * Loads a user by "username OR email" for Spring Security.
- * Also fetches ROLE_* authorities via user_roles -> roles.
+/**
+ * Custom implementation of {@link UserDetailsService} for Spring Security.
+ * <p>
+ * Loads user details by either username or email and resolves their
+ * {@code ROLE_*} authorities from the database.
+ * </p>
  */
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -31,39 +33,53 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository users;
     private final JdbcTemplate jdbc;
 
+    /**
+     * Constructor for dependency injection.
+     * @param users repository for user lookups
+     * @param jdbc JDBC template used for role queries
+     */
     public CustomUserDetailsService(UserRepository users, JdbcTemplate jdbc) {
         this.users = users;
         this.jdbc = jdbc;
     }
 
+    /**
+     * Load user details for authentication by username or email.
+     * Supports flexible login input (email or username in the same field).
+     * @param emailOrUsername login identifier
+     * @return populated {@link UserDetails} for authentication
+     * @throws UsernameNotFoundException if no matching user is found
+     */
     @Override
     public UserDetails loadUserByUsername(String emailOrUsername) throws UsernameNotFoundException {
-        // Log who is being authenticated to make the logger useful
+        // Log attempt for troubleshooting and audit
         log.info("Attempting authentication for identifier: {}", emailOrUsername);
 
         String raw = safe(emailOrUsername);
 
-        // Prefer email if it looks like one
+        // Determine whether the input is likely an email
         Optional<com.clc.levelup.model.User> userOpt = raw.contains("@")
                 ? users.findByEmailIgnoreCase(raw.toLowerCase(Locale.ROOT))
                 : users.findByUsernameIgnoreCase(raw);
 
-        // Fallback: try the other way
+        // Fallback: if not found, try the alternate field
         if (userOpt.isEmpty()) {
             userOpt = raw.contains("@")
                     ? users.findByUsernameIgnoreCase(raw)
                     : users.findByEmailIgnoreCase(raw.toLowerCase(Locale.ROOT));
         }
 
+        // Throw exception if no match is found
         com.clc.levelup.model.User u =
                 userOpt.orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        Collection<? extends GrantedAuthority> auth = loadAuthorities(u.getId());
+        // Load all roles associated with this user
+        Collection<? extends GrantedAuthority> authorities = loadAuthorities(u.getId());
 
-        // Build a Spring Security user object using the hashed password
+        // Build Spring Security's UserDetails object with hashed password
         return User.withUsername(u.getUsername())
                 .password(u.getPassword())
-                .authorities(auth)
+                .authorities(authorities)
                 .accountExpired(false)
                 .accountLocked(false)
                 .credentialsExpired(false)
@@ -71,7 +87,11 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .build();
     }
 
-    // Reads roles for a user id and converts them to SimpleGrantedAuthority.
+    /**
+     * Retrieve user roles and map them to {@link SimpleGrantedAuthority} objects.
+     * @param userId ID of the user whose roles should be loaded
+     * @return list of granted authorities
+     */
     private List<GrantedAuthority> loadAuthorities(Long userId) {
         return jdbc.query(
                 "SELECT r.name AS role_name " +
@@ -82,6 +102,11 @@ public class CustomUserDetailsService implements UserDetailsService {
         );
     }
 
+    /**
+     * Trim and sanitize a string to prevent null references.
+     * @param s input string
+     * @return safe, trimmed string (never null)
+     */
     private String safe(String s) {
         return s == null ? "" : s.trim();
     }

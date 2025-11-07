@@ -11,38 +11,62 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+/**
+ * Handles product management pages.
+ * Supports viewing, creating, editing, and deleting products.
+ * Delegates all business logic to the ProductService.
+ */
 @Controller
 @RequestMapping("/products")
 public class ProductController {
 
     private final ProductService products;
 
-    // connect ProductService to this controller
+    /**
+     * Inject the ProductService dependency.
+     * @param products service providing product CRUD operations
+     */
     public ProductController(ProductService products) {
         this.products = products;
     }
 
-    // show the list of products
+    /**
+     * Display a list of all products.
+     * @param model MVC model for the view
+     * @return view for product list
+     */
     @GetMapping({"", "/list"})
     public String list(Model model) {
-        model.addAttribute("products", products.findAll()); // pass products to the view
+        // Fetch all products and send to the view
+        model.addAttribute("products", products.findAll());
         return "products/list";
     }
 
-    // show the create form
+    /**
+     * Show the new product creation form.
+     * @param model MVC model
+     * @return new product form view
+     */
     @GetMapping("/new")
     public String createForm(Model model) {
-        model.addAttribute("product", new Product()); // form backing object
+        model.addAttribute("product", new Product());
         return "products/new";
     }
 
-    // handle create form submit
+    /**
+     * Handle submission of the new product form.
+     * Performs lightweight field validation and delegates persistence to the service.
+     * @param p product form data
+     * @param result binding result for validation
+     * @param ra redirect attributes for success/error messages
+     * @return redirect or form view
+     */
     @PostMapping
     public String create(@Valid @ModelAttribute("product") Product p,
                          BindingResult result,
                          RedirectAttributes ra) {
 
-        // simple required checks for NOT NULL DB columns (keep it lightweight)
+        // Field-level checks for required fields
         if (p.getManufacturer() == null || p.getManufacturer().isBlank()) {
             result.rejectValue("manufacturer", "NotBlank", "Manufacturer is required.");
         }
@@ -54,15 +78,23 @@ public class ProductController {
         }
 
         if (result.hasErrors()) {
-            return "products/new"; // go back to form if errors
+            // Re-display form if validation fails
+            return "products/new";
         }
 
-        products.create(p); // add product
+        // Save product and redirect to list view
+        products.create(p);
         ra.addFlashAttribute("success", "Product created.");
-        return "redirect:/products/list"; // redirect to list
+        return "redirect:/products/list";
     }
 
-    // show a single product (details page)
+    /**
+     * Show details for a specific product.
+     * @param id product ID
+     * @param model MVC model
+     * @param ra redirect attributes
+     * @return details view or redirect if not found
+     */
     @GetMapping("/{id}")
     public String details(@PathVariable("id") Long id,
                           Model model,
@@ -78,7 +110,13 @@ public class ProductController {
                 });
     }
 
-    // show the edit form
+    /**
+     * Show the edit form for an existing product.
+     * @param id product ID
+     * @param model MVC model
+     * @param ra redirect attributes
+     * @return edit form view or redirect if product missing
+     */
     @GetMapping("/edit/{id}")
     public String editForm(@PathVariable("id") Long id,
                            Model model,
@@ -94,14 +132,22 @@ public class ProductController {
                 });
     }
 
-    // handle edit form submit
+    /**
+     * Handle submission of the product edit form.
+     * Validates and updates the product.
+     * @param pathId path variable ID
+     * @param form updated product data
+     * @param result validation result
+     * @param ra redirect attributes
+     * @return redirect to product detail or list
+     */
     @PostMapping("/edit/{id}")
     public String editSubmit(@PathVariable("id") Long pathId,
                              @Valid @ModelAttribute("product") Product form,
                              BindingResult result,
                              RedirectAttributes ra) {
 
-        // required fields (same checks as create)
+        // Repeat same validation used during creation
         if (form.getManufacturer() == null || form.getManufacturer().isBlank()) {
             result.rejectValue("manufacturer", "NotBlank", "Manufacturer is required.");
         }
@@ -117,7 +163,7 @@ public class ProductController {
         }
 
         try {
-            // make sure the path id is used for the update
+            // Ensure the product being updated matches the URL path ID
             form.setId(pathId);
             products.update(form);
             ra.addFlashAttribute("success", "Product updated.");
@@ -128,9 +174,15 @@ public class ProductController {
         }
     }
 
-    // --- Two-step delete: GET confirm + POST delete ---
+    // --- Two-step delete: confirmation and final removal ---
 
-    // show delete confirm page (keeps deletes off GET to be safer)
+    /**
+     * Display a confirmation page before deleting a product.
+     * @param id product ID
+     * @param model MVC model
+     * @param ra redirect attributes
+     * @return delete confirmation view or redirect if not found
+     */
     @GetMapping("/delete/{id}")
     public String confirmDelete(@PathVariable("id") Long id,
                                 Model model,
@@ -138,7 +190,7 @@ public class ProductController {
         return products.findById(id)
                 .map(p -> {
                     model.addAttribute("product", p);
-                    return "products/delete"; // confirm page template
+                    return "products/delete";
                 })
                 .orElseGet(() -> {
                     ra.addFlashAttribute("error", "Product not found.");
@@ -146,11 +198,16 @@ public class ProductController {
                 });
     }
 
-    // handle delete submit (from confirm page)
+    /**
+     * Process confirmed delete requests.
+     * @param id product ID
+     * @param ra redirect attributes
+     * @return redirect to products list after deletion
+     */
     @PostMapping("/delete/{id}")
     public String delete(@PathVariable("id") Long id, RedirectAttributes ra) {
         try {
-            products.deleteById(id); // service does existence check
+            products.deleteById(id);
             ra.addFlashAttribute("success", "Product deleted.");
         } catch (IllegalArgumentException ex) {
             ra.addFlashAttribute("error", ex.getMessage());
